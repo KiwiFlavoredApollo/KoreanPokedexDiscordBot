@@ -1,0 +1,8 @@
+services:
+  discord-bot:
+    build: .
+    container_name: korean-pokedex
+    restart: unless-stopped
+    environment:
+      DISCORD_BOT_TOKEN=$DISCORD_BOT_TOKEN
+
