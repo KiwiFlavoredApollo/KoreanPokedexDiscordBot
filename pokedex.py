@@ -13,11 +13,32 @@ class UnknownPokemonSpeciesIdException(Exception):
     pass
 
 
+class UnknownPokemonTypeIdException(Exception):
+    pass
+
+
+class UnknownPokemonAbilityIdException:
+    pass
+
+
+class UnknownPokemonEggGroupIdException:
+    pass
+
+
 class KoreanPokedex:
     def __init__(self):
-        self.species_db = self._import_csv('database/pokemon_species_names.csv')
-        self.types_db = self._import_csv('database/type_names.csv')
-        self.ability_db = self._import_csv('database/ability_names.csv')
+        self.pokemon_species_name_db = self._import_csv('database/pokemon_species_names.csv')
+
+        self.pokemon_types_db = self._import_csv('database/pokemon_types.csv')
+        self.type_names_db = self._import_csv('database/type_names.csv')
+
+        self.pokemon_abilities_db = self._import_csv('database/pokemon_abilities.csv')
+        self.ability_names_db = self._import_csv('database/ability_names.csv')
+
+        self.pokemon_stats_db = self._import_csv('database/pokemon_stats.csv')
+
+        self.pokemon_egg_groups_db = self._import_csv('database/pokemon_egg_groups.csv')
+        self.egg_group_names_db = self._import_csv('database/egg_groups.csv')
 
     def _import_json(self, path):
         with open(path, 'r') as file:
@@ -27,17 +48,17 @@ class KoreanPokedex:
         with open(path, 'r', encoding='utf-8', newline='') as file:
             return list(csv.reader(file))
 
-    def _translate_pokemon_name_korean_to_english(self, korean):
-        species_id = self._get_species_id(korean)
+    def korean_to_english(self, name):
+        species_id = self._get_species_id_by_korean_name(name)
         return self._get_pokemon_english_name(species_id)
 
-    def _get_species_id(self, korean_pokemon_name):
+    def _get_species_id_by_korean_name(self, name):
         _SPECIES_ID = 0
         _LANGUAGE = 1
         _NAME = 2
 
-        korean = filter(lambda r: r[_LANGUAGE] == str(KOREAN), self.species_db)
-        result = filter(lambda r: r[_NAME] == korean_pokemon_name, korean)
+        korean = filter(lambda r: r[_LANGUAGE] == str(KOREAN), self.pokemon_species_name_db)
+        result = filter(lambda r: r[_NAME] == name, korean)
         result = list(result)
 
         if len(result) != 1:
@@ -49,10 +70,104 @@ class KoreanPokedex:
         _LANGUAGE = 1
         _NAME = 2
 
-        english = filter(lambda r: r[_LANGUAGE] == str(ENGLISH), self.species_db)
+        english = filter(lambda r: r[_LANGUAGE] == str(ENGLISH), self.pokemon_species_name_db)
         result = filter(lambda r: r[_SPECIES_ID] == str(species_id), english)
         result = list(result)
 
         if len(result) != 1:
             raise UnknownPokemonSpeciesIdException
+        return str(result[0][_NAME])
+
+    def get_pokemon_info(self, pokemon):
+        species_id = self._get_species_id_by_korean_name(pokemon)
+        types = self._get_pokemon_type(species_id)
+        abilities = self._get_pokemon_abilities(species_id)
+        stats = self._get_pokemon_stats(species_id)
+        egg_groups = self._get_pokemon_egg_groups(species_id)
+        return {
+            "types": types,
+            "abilities": abilities,
+            "stats": stats,
+            "egg_groups": egg_groups
+        }
+
+    def _get_pokemon_type(self, species_id):
+        _SPECIES_ID = 0
+        _TYPE_ID = 1
+
+        species_types = filter(lambda r: r[_SPECIES_ID] == str(species_id), self.pokemon_types_db)
+        type_ids = map(lambda r: r[_TYPE_ID], species_types)
+        type_names = list(map(lambda r: self._type_id_to_name(r), type_ids))
+        return type_names
+
+    def _get_pokemon_abilities(self, species_id):
+        _SPECIES_ID = 0
+        _ABILITY_ID = 1
+
+        species_abilities = filter(lambda r: r[_SPECIES_ID] == str(species_id), self.pokemon_abilities_db)
+        ability_ids = map(lambda r: r[_ABILITY_ID], species_abilities)
+        ability_names = list(map(lambda r: self._ability_id_to_name(r), ability_ids))
+        return ability_names
+
+    def _get_pokemon_stats(self, species_id):
+        _SPECIES_ID = 0
+        _STAT_ID = 1
+        _STAT_VALUE = 2
+
+        species_stats = filter(lambda r: r[_SPECIES_ID] == str(species_id), self.pokemon_stats_db)
+        stats = list(map(lambda r: int(r[_STAT_VALUE]), species_stats))
+        return {
+            "hp": stats[0],
+            "atk": stats[1],
+            "def": stats[2],
+            "spa": stats[3],
+            "spd": stats[4],
+            "spe": stats[5],
+            "total": sum(stats)
+        }
+
+    def _get_pokemon_egg_groups(self, species_id):
+        _SPECIES_ID = 0
+        _EGG_GROUP_ID = 1
+
+        species_egg_groups = filter(lambda r: r[_SPECIES_ID] == str(species_id), self.pokemon_egg_groups_db)
+        egg_group_ids = map(lambda r: r[_EGG_GROUP_ID], species_egg_groups)
+        egg_group_names = list(map(lambda r: self._egg_group_id_to_name(r), egg_group_ids))
+        return egg_group_names
+
+    def _type_id_to_name(self, type_id):
+        _TYPE_ID = 0
+        _LANGUAGE = 1
+        _NAME = 2
+
+        type_names = filter(lambda r: r[_LANGUAGE] == str(KOREAN), self.type_names_db)
+        result = filter(lambda r: r[_TYPE_ID] == str(type_id), type_names)
+        result = list(result)
+
+        if len(result) != 1:
+            raise UnknownPokemonTypeIdException
+        return str(result[0][_NAME])
+
+    def _ability_id_to_name(self, ability_id):
+        _ABILITY_ID = 0
+        _LANGUAGE = 1
+        _NAME = 2
+
+        ability_names = filter(lambda r: r[_LANGUAGE] == str(KOREAN), self.ability_names_db)
+        result = filter(lambda r: r[_ABILITY_ID] == str(ability_id), ability_names)
+        result = list(result)
+
+        if len(result) != 1:
+            raise UnknownPokemonAbilityIdException
+        return str(result[0][_NAME])
+
+    def _egg_group_id_to_name(self, egg_group_id):
+        _ABILITY_ID = 0
+        _NAME = 2
+
+        result = filter(lambda r: r[_ABILITY_ID] == str(egg_group_id), self.egg_group_names_db)
+        result = list(result)
+
+        if len(result) != 1:
+            raise UnknownPokemonEggGroupIdException
         return str(result[0][_NAME])
