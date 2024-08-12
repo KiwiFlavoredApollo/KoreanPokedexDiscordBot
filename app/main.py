@@ -28,13 +28,14 @@ async def pokedex(interaction: discord.Interaction, 이름: str) -> None:
         embed.add_field(name="속성", value=", ".join(pokemon['types']))
         embed.add_field(name="특성", value=", ".join(pokemon['abilities']))
         embed.add_field(name="개체값",
-                        value="HP: {}, 공격: {}, 방어: {}, 특수공격: {}, 특수방어: {}, 스피드: {}"
+                        value="HP: {}, 공격: {}, 방어: {}, 특수공격: {}, 특수방어: {}, 스피드: {}, 총합: {}"
                         .format(pokemon['stats']['hp'],
                                 pokemon['stats']['atk'],
                                 pokemon['stats']['def'],
                                 pokemon['stats']['spa'],
                                 pokemon['stats']['spd'],
-                                pokemon['stats']['spe']),
+                                pokemon['stats']['spe'],
+                                pokemon['stats']['total']),
                         inline=False)
         embed.add_field(name="알그룹", value=", ".join(pokemon['egg_groups']), inline=False)
         await interaction.response.send_message(embed=embed)
@@ -49,4 +50,4 @@ async def on_ready():
 
 
 if __name__ == '__main__':
-    bot.run(os.getenv("TOKEN"))
+    bot.run(os.getenv("DISCORD_BOT_TOKEN"))
