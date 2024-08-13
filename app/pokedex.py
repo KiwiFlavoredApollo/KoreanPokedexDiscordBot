@@ -201,6 +201,7 @@ class KoreanPokedex:
         if len(result) != 1:
             raise UnknownKoreanMoveNameException
         move_info = result[0]
+
         return {
             "type": self._type_id_to_name(move_info[_TYPE]),
             "damage_class": self._damage_class_id_to_name(move_info[_DAMAGE_CLASS_ID]),
@@ -208,6 +209,7 @@ class KoreanPokedex:
             "pp": move_info[_PP],
             "accuracy": move_info[_ACCURACY],
             "priority": move_info[_PRIORITY],
+            "fandom": self._get_fandom_wiki_link(move)
         }
 
     def _get_move_id_by_korean_name(self, name):
@@ -235,3 +237,8 @@ class KoreanPokedex:
         if len(result) != 1:
             raise UnknownMoveDamageClassIdException
         return result[0][_NAME]
+
+    def _get_fandom_wiki_link(self, move):
+        _PREFIX = "https://pokemon.fandom.com/ko/wiki/"
+
+        return "".join([_PREFIX, move])

@@ -62,6 +62,10 @@ async def get_move_info(interaction: discord.Interaction, 이름: str) -> None:
         embed.add_field(name="명중률", value=move["accuracy"])
         embed.add_field(name="PP", value=move["pp"])
         embed.add_field(name="우선도", value=move["priority"])
+        embed.add_field(name="참고문헌",
+                        value=" • ".join([
+                            "[팬덤 위키]({})".format(move["fandom"]),
+                        ]))
         await interaction.response.send_message(embed=embed)
 
     except UnknownKoreanMoveNameException:
