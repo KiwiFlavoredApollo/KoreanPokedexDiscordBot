@@ -93,15 +93,12 @@ class KoreanPokedex:
 
     def get_pokemon_info(self, pokemon):
         species_id = self._get_species_id_by_korean_name(pokemon)
-        types = self._get_pokemon_type(species_id)
-        abilities = self._get_pokemon_abilities(species_id)
-        stats = self._get_pokemon_stats(species_id)
-        egg_groups = self._get_pokemon_egg_groups(species_id)
         return {
-            "types": types,
-            "abilities": abilities,
-            "stats": stats,
-            "egg_groups": egg_groups
+            "types": self._get_pokemon_type(species_id),
+            "abilities": self._get_pokemon_abilities(species_id),
+            "stats": self._get_pokemon_stats(species_id),
+            "egg_groups": self._get_pokemon_egg_groups(species_id),
+            "fandom": self._get_fandom_wiki_link(pokemon)
         }
 
     def _get_pokemon_type(self, species_id):
@@ -176,9 +173,11 @@ class KoreanPokedex:
 
     def _egg_group_id_to_name(self, egg_group_id):
         _ABILITY_ID = 0
+        _LANGUAGE = 1
         _NAME = 2
 
-        result = filter(lambda r: r[_ABILITY_ID] == str(egg_group_id), self.egg_group_names_db)
+        korean = filter(lambda r: r[_LANGUAGE] == str(KOREAN), self.egg_group_names_db)
+        result = filter(lambda r: r[_ABILITY_ID] == str(egg_group_id), korean)
         result = list(result)
 
         if len(result) != 1:
@@ -238,7 +237,7 @@ class KoreanPokedex:
             raise UnknownMoveDamageClassIdException
         return result[0][_NAME]
 
-    def _get_fandom_wiki_link(self, move):
+    def _get_fandom_wiki_link(self, keyword):
         _PREFIX = "https://pokemon.fandom.com/ko/wiki/"
 
-        return "".join([_PREFIX, move])
+        return "".join([_PREFIX, keyword])

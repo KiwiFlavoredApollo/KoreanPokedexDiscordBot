@@ -41,6 +41,10 @@ async def get_pokemon_info(interaction: discord.Interaction, 이름: str) -> Non
                                 pokemon['stats']['total']),
                         inline=False)
         embed.add_field(name="알그룹", value=", ".join(pokemon['egg_groups']), inline=False)
+        embed.add_field(name="참고문헌",
+                        value=" • ".join([
+                            "[팬덤 위키]({})".format(pokemon["fandom"]),
+                        ]))
         await interaction.response.send_message(embed=embed)
 
     except UnknownKoreanPokemonNameException:
