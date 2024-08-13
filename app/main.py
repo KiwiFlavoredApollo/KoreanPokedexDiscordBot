@@ -7,7 +7,10 @@ from discord import app_commands
 from discord.ext import commands
 from dotenv import load_dotenv
 
-from pokedex import KoreanPokedex, UnknownKoreanPokemonNameException
+from pokedex import KoreanPokedex, UnknownKoreanPokemonNameException, UnknownKoreanMoveNameException
+
+if os.getenv('PYCHARM_HOSTED') == '1':
+    os.chdir('./app')
 
 load_dotenv()
 intents = discord.Intents.default()
@@ -17,7 +20,7 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 
 @bot.tree.command(name="포켓몬", description="포켓몬 정보")
 @app_commands.describe(이름="포켓몬 이름")
-async def pokedex(interaction: discord.Interaction, 이름: str) -> None:
+async def get_pokemon_info(interaction: discord.Interaction, 이름: str) -> None:
     try:
         pokemon = KoreanPokedex().get_pokemon_info(이름)
         embed = discord.Embed(
@@ -41,6 +44,27 @@ async def pokedex(interaction: discord.Interaction, 이름: str) -> None:
         await interaction.response.send_message(embed=embed)
 
     except UnknownKoreanPokemonNameException:
+        pass
+
+@bot.tree.command(name="기술", description="기술 정보")
+@app_commands.describe(이름="기술 이름")
+async def get_move_info(interaction: discord.Interaction, 이름: str) -> None:
+    try:
+        move = KoreanPokedex().get_move_info(이름)
+        embed = discord.Embed(
+            title=이름,
+            color=discord.Color.random(),
+            timestamp=datetime.datetime.now(datetime.UTC)
+        )
+        embed.add_field(name="속성", value=move["type"])
+        embed.add_field(name="분류", value=move["damage_class"])
+        embed.add_field(name="위력", value=move["power"])
+        embed.add_field(name="명중률", value=move["accuracy"])
+        embed.add_field(name="PP", value=move["pp"])
+        embed.add_field(name="우선도", value=move["priority"])
+        await interaction.response.send_message(embed=embed)
+
+    except UnknownKoreanMoveNameException:
         pass
 
 @bot.event
