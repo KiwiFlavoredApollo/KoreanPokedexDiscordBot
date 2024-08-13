@@ -244,4 +244,4 @@ class KoreanPokedex:
         return "".join([_PREFIX, keyword])
 
     def _get_pokemon_image(self, species_id):
-        return "https://www.serebii.net/pokemon/art/{}.png".format(species_id)
+        return "https://www.serebii.net/pokemon/art/{:03}.png".format(species_id)
