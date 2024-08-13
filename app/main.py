@@ -28,6 +28,7 @@ async def get_pokemon_info(interaction: discord.Interaction, 이름: str) -> Non
             color=discord.Color.random(),
             timestamp=datetime.datetime.now(datetime.UTC)
         )
+        embed.set_image(url=pokemon["image"])
         embed.add_field(name="속성", value=", ".join(pokemon['types']))
         embed.add_field(name="특성", value=", ".join(pokemon['abilities']))
         embed.add_field(name="개체값",
@@ -49,6 +50,7 @@ async def get_pokemon_info(interaction: discord.Interaction, 이름: str) -> Non
 
     except UnknownKoreanPokemonNameException:
         pass
+
 
 @bot.tree.command(name="기술", description="기술 정보")
 @app_commands.describe(이름="기술 이름")
@@ -74,6 +76,7 @@ async def get_move_info(interaction: discord.Interaction, 이름: str) -> None:
 
     except UnknownKoreanMoveNameException:
         pass
+
 
 @bot.event
 async def on_ready():
