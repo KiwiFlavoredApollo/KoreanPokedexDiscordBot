@@ -1,4 +1,7 @@
-id,identifier
-1,status
-2,physical
-3,special
+id,local_language_id,identifier
+1,3,변화
+1,9,status
+2,3,물리
+2,9,physical
+3,3,특수
+3,9,special
