@@ -116,7 +116,7 @@ class KoreanPokedex:
         _ABILITY_ID = 1
 
         species_abilities = filter(lambda r: r[_SPECIES_ID] == str(species_id), self.pokemon_abilities_db)
-        ability_ids = map(lambda r: r[_ABILITY_ID], species_abilities)
+        ability_ids = set(map(lambda r: r[_ABILITY_ID], species_abilities))
         ability_names = list(map(lambda r: self._ability_id_to_name(r), ability_ids))
         return ability_names
 
@@ -160,11 +160,30 @@ class KoreanPokedex:
         return str(result[0][_NAME])
 
     def _ability_id_to_name(self, ability_id):
+        try:
+            return self._ability_id_to_name_korean(ability_id)
+        except UnknownPokemonAbilityIdException:
+            return self._ability_id_to_name_english(ability_id)
+
+    def _ability_id_to_name_korean(self, ability_id):
         _ABILITY_ID = 0
         _LANGUAGE = 1
         _NAME = 2
 
         ability_names = filter(lambda r: r[_LANGUAGE] == str(KOREAN), self.ability_names_db)
+        result = filter(lambda r: r[_ABILITY_ID] == str(ability_id), ability_names)
+        result = list(result)
+
+        if len(result) != 1:
+            raise UnknownPokemonAbilityIdException
+        return str(result[0][_NAME])
+
+    def _ability_id_to_name_english(self, ability_id):
+        _ABILITY_ID = 0
+        _LANGUAGE = 1
+        _NAME = 2
+
+        ability_names = filter(lambda r: r[_LANGUAGE] == str(ENGLISH), self.ability_names_db)
         result = filter(lambda r: r[_ABILITY_ID] == str(ability_id), ability_names)
         result = list(result)
 
