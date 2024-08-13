@@ -1,11 +1,16 @@
 import csv
 import json
+import os
 
 ENGLISH = 9
 KOREAN = 3
 
 
 class UnknownKoreanPokemonNameException(Exception):
+    pass
+
+
+class UnknownKoreanMoveNameException(Exception):
     pass
 
 
@@ -17,11 +22,15 @@ class UnknownPokemonTypeIdException(Exception):
     pass
 
 
-class UnknownPokemonAbilityIdException:
+class UnknownPokemonAbilityIdException(Exception):
     pass
 
 
-class UnknownPokemonEggGroupIdException:
+class UnknownPokemonEggGroupIdException(Exception):
+    pass
+
+
+class UnknownMoveDamageClassIdException(Exception):
     pass
 
 
@@ -39,6 +48,10 @@ class KoreanPokedex:
 
         self.pokemon_egg_groups_db = self._import_csv('database/pokemon_egg_groups.csv')
         self.egg_group_names_db = self._import_csv('database/egg_groups.csv')
+
+        self.moves_db = self._import_csv('database/moves.csv')
+        self.move_names_db = self._import_csv('database/move_names.csv')
+        self.move_damage_classes_db = self._import_csv('database/move_damage_classes.csv')
 
     def _import_json(self, path):
         with open(path, 'r') as file:
@@ -171,3 +184,54 @@ class KoreanPokedex:
         if len(result) != 1:
             raise UnknownPokemonEggGroupIdException
         return str(result[0][_NAME])
+
+    def get_move_info(self, move):
+        _MOVE_ID = 0
+        _TYPE = 3
+        _POWER = 4
+        _PP = 5
+        _ACCURACY = 6
+        _PRIORITY = 7
+        _DAMAGE_CLASS_ID = 9
+        _EFFECT_ID = 10
+
+        move_id = self._get_move_id_by_korean_name(move)
+        result = list(filter(lambda r: r[_MOVE_ID] == str(move_id), self.moves_db))
+
+        if len(result) != 1:
+            raise UnknownKoreanMoveNameException
+        move_info = result[0]
+        return {
+            "type": self._type_id_to_name(move_info[_TYPE]),
+            "damage_class": self._damage_class_id_to_name(move_info[_DAMAGE_CLASS_ID]),
+            "power": move_info[_POWER],
+            "pp": move_info[_PP],
+            "accuracy": move_info[_ACCURACY],
+            "priority": move_info[_PRIORITY],
+        }
+
+    def _get_move_id_by_korean_name(self, name):
+        _MOVE_ID = 0
+        _LANGUAGE = 1
+        _NAME = 2
+
+        korean = filter(lambda r: r[_LANGUAGE] == str(KOREAN), self.move_names_db)
+        result = filter(lambda r: r[_NAME] == name, korean)
+        result = list(result)
+
+        if len(result) != 1:
+            raise UnknownKoreanMoveNameException
+        return int(result[0][_MOVE_ID])
+
+    def _damage_class_id_to_name(self, damage_class_id):
+        _DAMAGE_CLASS_ID = 0
+        _LANGUAGE = 1
+        _NAME = 2
+
+        korean = filter(lambda r: r[_LANGUAGE] == str(KOREAN), self.move_damage_classes_db)
+        result = filter(lambda r: r[_DAMAGE_CLASS_ID] == damage_class_id, korean)
+        result = list(result)
+
+        if len(result) != 1:
+            raise UnknownMoveDamageClassIdException
+        return result[0][_NAME]
