@@ -12,7 +12,7 @@ PokeAPI 데이터베이스를 활용한 한국어 포켓몬 도감 디스코드 
 
 ## Gallery
 
-![KoreanPokedexDiscordBot](https://imgur.com/022qC2N)
+![KoreanPokedexDiscordBot](https://i.imgur.com/022qC2N.png)
 
 ## Reference
 
