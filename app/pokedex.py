@@ -34,6 +34,10 @@ class UnknownMoveDamageClassIdException(Exception):
     pass
 
 
+class UnknownMoveIdException(Exception):
+    pass
+
+
 class KoreanPokedex:
     def __init__(self):
         self.pokemon_species_name_db = self._import_csv('database/pokemon_species_names.csv')
@@ -94,21 +98,33 @@ class KoreanPokedex:
     def get_pokemon_info(self, pokemon):
         species_id = self._get_species_id_by_korean_name(pokemon)
         return {
+            "name": {
+                "korean": pokemon,
+                "english": self._get_pokemon_english_name(species_id),
+            },
             "image": self._get_pokemon_image(species_id),
-            "types": self._get_pokemon_type(species_id),
+            "types": list(map(lambda r: self._type_id_to_name(r), self._get_pokemon_type_ids(species_id))),
             "abilities": self._get_pokemon_abilities(species_id),
             "stats": self._get_pokemon_stats(species_id),
             "egg_groups": self._get_pokemon_egg_groups(species_id),
             "fandom": self._get_fandom_wiki_link(pokemon),
         }
 
-    def _get_pokemon_type(self, species_id):
+    def _get_pokemon_type_ids(self, species_id):
         _SPECIES_ID = 0
         _TYPE_ID = 1
 
         species_types = filter(lambda r: r[_SPECIES_ID] == str(species_id), self.pokemon_types_db)
-        type_ids = map(lambda r: r[_TYPE_ID], species_types)
+        type_ids = list(map(lambda r: r[_TYPE_ID], species_types))
+
+        if len(type_ids) != 1 and len(type_ids) != 2:
+            raise UnknownPokemonSpeciesIdException
+        return type_ids
+
+    def _get_pokemon_types(self, species_id):
+        type_ids = self._get_pokemon_type_ids(species_id)
         type_names = list(map(lambda r: self._type_id_to_name(r), type_ids))
+
         return type_names
 
     def _get_pokemon_abilities(self, species_id):
@@ -222,6 +238,10 @@ class KoreanPokedex:
         move_info = result[0]
 
         return {
+            "name": {
+                "korean": move,
+                "english": self._get_move_english_name(move_id),
+            },
             "type": self._type_id_to_name(move_info[_TYPE]),
             "damage_class": self._damage_class_id_to_name(move_info[_DAMAGE_CLASS_ID]),
             "power": move_info[_POWER],
@@ -267,3 +287,16 @@ class KoreanPokedex:
             return "https://www.serebii.net/pokemon/art/{:03}.png".format(species_id)
         else:
             return "https://www.serebii.net/pokemon/art/{}.png".format(species_id)
+
+    def _get_move_english_name(self, move_id):
+        _MOVE_ID = 0
+        _LANGUAGE = 1
+        _NAME = 2
+
+        english = filter(lambda r: r[_LANGUAGE] == str(ENGLISH), self.move_names_db)
+        result = filter(lambda r: r[_MOVE_ID] == str(move_id), english)
+        result = list(result)
+
+        if len(result) != 1:
+            raise UnknownMoveIdException
+        return result[0][_NAME]

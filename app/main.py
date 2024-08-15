@@ -24,7 +24,10 @@ async def get_pokemon_info(interaction: discord.Interaction, 이름: str) -> Non
     try:
         pokemon = KoreanPokedex().get_pokemon_info(이름)
         embed = discord.Embed(
-            title=이름,
+            title="{} ({})".format(
+                pokemon['name']['korean'],
+                pokemon['name']['english']
+            ),
             color=discord.Color.random(),
             timestamp=datetime.datetime.now(datetime.UTC)
         )
@@ -58,7 +61,10 @@ async def get_move_info(interaction: discord.Interaction, 이름: str) -> None:
     try:
         move = KoreanPokedex().get_move_info(이름)
         embed = discord.Embed(
-            title=이름,
+            title="{} ({})".format(
+                move['name']['korean'],
+                move['name']['english']
+            ),
             color=discord.Color.random(),
             timestamp=datetime.datetime.now(datetime.UTC)
         )
